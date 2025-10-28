@@ -1,41 +1,49 @@
 import React, { useState } from 'react';
-import { useAuth } from '../auth/AuthContext';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import loginVideo from '../assets/login.mp4';
+import { useAuth } from '../auth/AuthContext';
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [err, setErr] = useState<string | null>(null);
-  const loc = useLocation();
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErr(null);
+    setError(null);
+
+    if (!email.trim() || !password) {
+      setError('Please enter email and password.');
+      return;
+    }
+
+    setLoading(true);
     try {
-      const user = await login(email, password);
-      const from = (loc.state as any)?.from?.pathname || '/dashboard';
-      navigate(from, { replace: true });
-    } catch (ex: any) {
-      setErr(ex?.message || 'Login failed');
+      await login(email, password);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err?.message || 'Login failed. Check credentials and try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row h-screen overflow-hidden">
       {/* left: form (40%) */}
-      <div className="w-full md:w-2/5 flex items-center justify-center p-6 bg-white text-black">
+      <div className="w-full md:w-2/5 flex items-center justify-center p-6 bg-white text-black md:h-screen overflow-auto">
         <div className="w-full max-w-md">
-          <h1 className="text-2xl font-semibold mb-2">Welcome back</h1>
-          <p className="text-sm text-gray-600 mb-6">
-            Secure, private mood tracking — sign in to continue. New here? Create an account in seconds.
+          <h1 className="text-2xl font-semibold mb-4">Sign in to your account</h1>
+          <p className="text-sm text-gray-700 mb-6">
+            Welcome back — enter your details to continue tracking your wellness.
           </p>
 
-          {err && <div className="mb-4 text-sm text-red-600">{err}</div>}
+          {error && <div className="mb-4 text-sm text-red-600">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={onSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Email</label>
               <input
@@ -60,40 +68,27 @@ const Login: React.FC = () => {
               />
             </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" className="h-4 w-4" />
-                Remember me
-              </label>
-              <button
-                type="button"
-                className="text-blue-600 hover:underline"
-                onClick={() => navigate('/forgot-password')}
-              >
-                Forgot?
-              </button>
-            </div>
-
             <button
               type="submit"
               className="w-full py-2.5 rounded-md bg-black text-white hover:bg-black/90 disabled:opacity-60"
+              disabled={loading}
             >
-              Sign in
+              {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
+            New here?{' '}
             <button onClick={() => navigate('/signup')} className="text-blue-600 hover:underline">
-              Create one
+              Create an account
             </button>
           </div>
         </div>
       </div>
 
-      {/* right: video area (60%) */}
-      <div className="w-full md:w-3/5 h-56 md:h-auto">
-        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+      {/* right: media area (60%) */}
+      <div className="w-full md:w-3/5 md:h-screen">
+        <div className="w-full h-full bg-gray-100 flex items-center justify-center overflow-hidden">
           <video
             src={loginVideo}
             className="w-full h-full object-cover"

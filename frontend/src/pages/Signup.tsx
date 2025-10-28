@@ -80,9 +80,10 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    // make the whole layout exactly the viewport height and hide page-level scroll
+    <div className="min-h-screen flex flex-col md:flex-row h-screen overflow-hidden">
       {/* left: form (40%) */}
-      <div className="w-full md:w-2/5 flex items-center justify-center p-6 bg-white text-black">
+      <div className="w-full md:w-2/5 flex items-center justify-center p-6 bg-white text-black md:h-screen overflow-auto">
         <div className="w-full max-w-md">
           <h1 className="text-2xl font-semibold mb-4">Create an account</h1>
           <p className="text-sm text-gray-700 mb-6 font-medium leading-relaxed">
@@ -164,8 +165,8 @@ const Signup: React.FC = () => {
       </div>
 
       {/* right: media area (60%) */}
-      <div className="w-full md:w-3/5 h-56 md:h-auto">
-        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+      <div className="w-full md:w-3/5 md:h-screen">
+        <div className="w-full h-full bg-gray-100 flex items-center justify-center overflow-hidden">
           <video
             src={loginVideo}
             className="w-full h-full object-cover"
