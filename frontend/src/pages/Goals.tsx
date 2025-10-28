@@ -264,38 +264,82 @@ const Goals: React.FC = () => {
   const toggleComplete = async (id: string) => {
     const current = goals.find((g) => g.id === id);
     if (!current) return;
+    
+    // Optimistically update UI first
+    setGoals((s) =>
+      s.map((x) =>
+        x.id === id
+          ? {
+              ...x,
+              completed: !current.completed,
+              completedAt: !current.completed ? new Date().toISOString() : undefined,
+            }
+          : x
+      )
+    );
+
     try {
-      // backend exposes PUT /api/goals/:id for updates
-      const payload = { completed: !current.completed, completed_at: !current.completed ? new Date().toISOString() : null };
-      const res = await authFetch(buildUrl(`/api/goals/${id}`), { method: 'PUT', body: JSON.stringify(payload) });
+      // Format date properly for database
+      const completedAt = !current.completed ? new Date().toISOString().split('T')[0] : null;
+      
+      const payload = { 
+        completed: !current.completed, 
+        completed_at: completedAt 
+      };
+      
+      const res = await authFetch(buildUrl(`/api/goals/${id}`), { 
+        method: 'PUT', 
+        body: JSON.stringify(payload) 
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status} ${res.statusText}`);
+      }
+      
       const data = await (async () => {
-        const t = await res.text();
-        return t ? JSON.parse(t) : {};
+        const text = await res.text();
+        return text ? JSON.parse(text) : {};
       })();
-      const g = data.goal;
+      
+      // Sync with server response if available
+      if (data.goal) {
+        const g = data.goal;
+        setGoals((s) =>
+          s.map((x) =>
+            x.id === id
+              ? {
+                  ...x,
+                  id: String(g.id),
+                  title: g.title || x.title,
+                  note: g.note || x.note,
+                  completed: Boolean(g.completed),
+                  completedAt: g.completed_at || undefined,
+                  priority: g.priority || x.priority || 'medium',
+                  tags: Array.isArray(g.tags) ? g.tags : g.tags ? JSON.parse(g.tags) : x.tags || [],
+                }
+              : x
+          )
+        );
+      }
+      
+      showToast(!current.completed ? 'Goal marked as completed' : 'Goal reopened');
+      
+    } catch (err: any) {
+      console.error('Toggle complete error:', err);
+      
+      // Revert optimistic update on error
       setGoals((s) =>
         s.map((x) =>
           x.id === id
             ? {
-                id: String(g.id),
-                title: g.title,
-                note: g.note || undefined,
-                createdAt: g.created_at || x.createdAt,
-                dueAt: g.due_at || undefined,
-                completed: Boolean(g.completed),
-                completedAt: g.completed_at || undefined,
-                priority: g.priority || 'medium',
-                tags: Array.isArray(g.tags) ? g.tags : g.tags ? JSON.parse(g.tags) : [],
+                ...x,
+                completed: current.completed,
+                completedAt: current.completedAt,
               }
             : x
         )
       );
-      if (!current.completed) {
-        showToast('Goal marked as completed');
-      } else {
-        showToast('Goal reopened');
-      }
-    } catch (err: any) {
+      
       showToast('Error: ' + (err.message || 'Update failed'));
     }
   };
