@@ -1,0 +1,17 @@
+CREATE TABLE IF NOT EXISTS mood_entries (
+  id VARCHAR(100) NOT NULL PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  score INT NOT NULL CHECK (score BETWEEN 1 AND 5),
+  energy INT NOT NULL DEFAULT 3 CHECK (energy BETWEEN 1 AND 5),
+  intensity INT NOT NULL DEFAULT 3 CHECK (intensity BETWEEN 1 AND 5),
+  emoji VARCHAR(10) NOT NULL,
+  note TEXT NULL,
+  date DATETIME NOT NULL,
+  tags JSON NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_mood_user_id (user_id),
+  INDEX idx_mood_date (date),
+  INDEX idx_mood_score (score),
+  CONSTRAINT fk_mood_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

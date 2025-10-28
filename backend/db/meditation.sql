@@ -1,0 +1,29 @@
+CREATE TABLE IF NOT EXISTS meditation_sessions (
+  id VARCHAR(100) NOT NULL PRIMARY KEY,
+  user_id INT UNSIGNED NULL,
+  title VARCHAR(255) NOT NULL,
+  minutes INT UNSIGNED NOT NULL DEFAULT 10,
+  description TEXT NULL,
+  custom TINYINT(1) NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_sessions_user_id (user_id),
+  CONSTRAINT fk_sessions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS meditation_runs (
+  id VARCHAR(100) NOT NULL PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  session_id VARCHAR(100) NULL,
+  session_title VARCHAR(255) NULL,
+  started_at DATETIME NOT NULL,
+  ended_at DATETIME NULL,
+  planned_minutes INT UNSIGNED NOT NULL DEFAULT 0,
+  actual_seconds INT UNSIGNED NOT NULL DEFAULT 0,
+  completed TINYINT(1) NOT NULL DEFAULT 0,
+  note TEXT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_runs_user_id (user_id),
+  INDEX idx_runs_session_id (session_id),
+  CONSTRAINT fk_runs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

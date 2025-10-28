@@ -1,0 +1,65 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Environment / secrets
+.env
+.env.*.local
+.env.local
+backend/.env
+frontend/.env
+
+# Logs
+logs/
+*.log
+debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Builds / caches / coverage
+dist/
+build/
+frontend/dist/
+backend/dist/
+coverage/
+.nyc_output/
+.cache/
+.tmp/
+.vite/
+.vite-deps/
+
+# Runtime / uploads / DB
+tmp/
+pids/
+*.pid
+*.seed
+*.pid.lock
+uploads/
+public/uploads/
+*.sqlite
+*.db
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Credentials / certs
+*.pem
+*.key
+
+# Process managers / docker
+pm2.pid
+pm2.log
+pm2-*.log
+docker-compose.override.yml
+
+# Package artifacts
+*.tgz
+
+# Misc
+*.log.*
+*.local
